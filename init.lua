@@ -86,21 +86,22 @@ function node_is_water(node)
 end
 
 --This code is more efficient
-local function quick_water_flow_logic(node,pos_testing,direction)
-	if node.name == "default:water_source" then
+local function quick_flow_logic(node,pos_testing,direction)
+	local name = node.name
+	if minetest.registered_nodes[name].liquidtype == "source" then
 		local node_testing = minetest.get_node(pos_testing)
 		local param2_testing = node_testing.param2
-		if node_testing.name ~= "default:water_flowing" then
+		if minetest.registered_nodes[node_testing.name].liquidtype ~= "flowing" then
 			return 0
 		else
 			return direction
 		end
-	elseif node.name == "default:water_flowing" then
+	elseif minetest.registered_nodes[name].liquidtype == "flowing" then
 		local node_testing = minetest.get_node(pos_testing)
 		local param2_testing = node_testing.param2
-		if node_testing.name == "default:water_source" then
+		if minetest.registered_nodes[node_testing.name].liquidtype == "source" then
 			return -direction
-		elseif node_testing.name == "default:water_flowing" then
+		elseif minetest.registered_nodes[node_testing.name].liquidtype == "flowing" then
 			if param2_testing < node.param2 then
 				if (node.param2 - param2_testing) > 6 then
 					return -direction
@@ -119,18 +120,18 @@ local function quick_water_flow_logic(node,pos_testing,direction)
 	return 0
 end
 
-function quick_water_flow(pos,node)
+function quick_flow(pos,node)
 	local x = 0
 	local z = 0
 	
-	if not node_is_water(node) then
+	if not minetest.get_item_group(node.name, "liquid") ~= 0  then
 		return {x=0,y=0,z=0}
 	end
 	
-	x = x + quick_water_flow_logic(node,{x=pos.x-1,y=pos.y,z=pos.z},-1)
-	x = x + quick_water_flow_logic(node,{x=pos.x+1,y=pos.y,z=pos.z}, 1)
-	z = z + quick_water_flow_logic(node,{x=pos.x,y=pos.y,z=pos.z-1},-1)
-	z = z + quick_water_flow_logic(node,{x=pos.x,y=pos.y,z=pos.z+1}, 1)
+	x = x + quick_flow_logic(node,{x=pos.x-1,y=pos.y,z=pos.z},-1)
+	x = x + quick_flow_logic(node,{x=pos.x+1,y=pos.y,z=pos.z}, 1)
+	z = z + quick_flow_logic(node,{x=pos.x,y=pos.y,z=pos.z-1},-1)
+	z = z + quick_flow_logic(node,{x=pos.x,y=pos.y,z=pos.z+1}, 1)
 	
 	return to_unit_vector({x=x,y=0,z=z})
 end
