@@ -16,12 +16,12 @@ function is_water(pos)
 	return (minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "water") ~= 0)
 end
 
-function node_is_water(node)
-	if node.name == "default:water_source" or node.name == "default:water_flowing" then
-		return true
-	else
-		return false
-	end
+function is_liquid(pos)
+	return (minetest.get_item_group(minetest.get_node({x=pos.x,y=pos.y,z=pos.z}).name, "liquid") ~= 0)
+end
+
+function node_is_liquid(node)
+	return (minetest.get_item_group(node.name, "liquid") ~= 0)
 end
 
 --This code is more efficient
@@ -63,7 +63,7 @@ function quick_flow(pos,node)
 	local x = 0
 	local z = 0
 	
-	if not minetest.get_item_group(node.name, "liquid") ~= 0  then
+	if not node_is_liquid(node)  then
 		return {x=0,y=0,z=0}
 	end
 	
@@ -81,19 +81,19 @@ end
 	--if pos changes with x, it affects z
 function move_centre(pos,realpos,node,radius)
 	if is_touching(realpos.x,pos.x,radius) then
-		if is_water({x=pos.x-1,y=pos.y,z=pos.z}) then
+		if is_liquid({x=pos.x-1,y=pos.y,z=pos.z}) then
 			node = minetest.get_node({x=pos.x-1,y=pos.y,z=pos.z})
 			pos = {x=pos.x-1,y=pos.y,z=pos.z}
-		elseif is_water({x=pos.x+1,y=pos.y,z=pos.z}) then
+		elseif is_liquid({x=pos.x+1,y=pos.y,z=pos.z}) then
 			node = minetest.get_node({x=pos.x+1,y=pos.y,z=pos.z})
 			pos = {x=pos.x+1,y=pos.y,z=pos.z}
 		end
 	end
 	if is_touching(realpos.z,pos.z,radius) then
-		if is_water({x=pos.x,y=pos.y,z=pos.z-1}) then
+		if is_liquid({x=pos.x,y=pos.y,z=pos.z-1}) then
 			node = minetest.get_node({x=pos.x,y=pos.y,z=pos.z-1})
 			pos = {x=pos.x,y=pos.y,z=pos.z-1}
-		elseif is_water({x=pos.x,y=pos.y,z=pos.z+1}) then
+		elseif is_liquid({x=pos.x,y=pos.y,z=pos.z+1}) then
 			node = minetest.get_node({x=pos.x,y=pos.y,z=pos.z+1})
 			pos = {x=pos.x,y=pos.y,z=pos.z+1}
 		end
